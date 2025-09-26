@@ -1,0 +1,39 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  logging:
+    loglevel: debug
+  otlp/groundcover-grpc:
+    endpoint: http://10.1.1.202:31519
+    tls:
+      insecure: true
+  otlp/groundcover-http:
+    endpoint: http://10.1.1.202:30907
+    tls:
+      insecure: true
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: groundcover-demo
+        action: upsert
+      - key: service.namespace
+        value: shash.demo
+        action: upsert
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [logging, otlp/groundcover-grpc, otlp/groundcover-http]

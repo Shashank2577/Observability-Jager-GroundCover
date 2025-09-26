@@ -8,4 +8,5 @@ spring:
     password: inventory
 
 observability:
+  service-name: shash.demo-inventory-service
   otlp-endpoint: http://localhost:4317

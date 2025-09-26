@@ -116,6 +116,12 @@ public class ObservabilityAutoConfiguration {
                     clientSpan.setAttribute("http.host", request.getURI().getHost());
                     clientSpan.setAttribute("http.target", request.getURI().getPath());
                     
+                    // GroundCover-specific attributes
+                    clientSpan.setAttribute("service.namespace", "shash.demo");
+                    clientSpan.setAttribute("deployment.environment", "groundcover-demo");
+                    clientSpan.setAttribute("service.version", "1.0.0");
+                    clientSpan.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
+                    
                     return execution.execute(request, body);
                 } catch (Exception e) {
                     clientSpan.recordException(e);

@@ -48,6 +48,13 @@ public final class ObservabilityHelper {
     public static void logWithAttributes(String message, Map<String, Object> attributes) {
         Span currentSpan = Span.current();
         if (currentSpan != null && currentSpan.getSpanContext().isValid()) {
+            // Add GroundCover-specific attributes
+            currentSpan.setAttribute("service.namespace", "shash.demo");
+            currentSpan.setAttribute("deployment.environment", "groundcover-demo");
+            currentSpan.setAttribute("service.version", "1.0.0");
+            currentSpan.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
+            
+            // Add custom attributes
             attributes.forEach((k,v) -> currentSpan.setAttribute(k, String.valueOf(v)));
         }
         MdcLogContextEnricher.populateFromCurrent();

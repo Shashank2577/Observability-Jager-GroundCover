@@ -26,13 +26,8 @@ data:
     exporters:
       logging:
         verbosity: normal
-      otlp:
-        # Forward to groundcover collector/agent if exposed internally; adjust endpoint accordingly.
-        endpoint: groundcover-opentelemetry-collector:4317
-        tls:
-          insecure: true
-      jaeger:
-        endpoint: jaeger:14250
+      otlp/groundcover:
+        endpoint: http://10.1.1.202:31519
         tls:
           insecure: true
     service:
@@ -43,7 +38,7 @@ data:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [otlp, jaeger, logging]
+          exporters: [otlp/groundcover, logging]
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, batch]

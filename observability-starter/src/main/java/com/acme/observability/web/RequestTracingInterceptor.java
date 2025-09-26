@@ -51,8 +51,22 @@ public class RequestTracingInterceptor implements HandlerInterceptor {
         request.setAttribute(SPAN_KEY, span);
         request.setAttribute(SCOPE_KEY, scope);
         MdcLogContextEnricher.populateMdc(span);
+        
+        // Standard HTTP attributes
         span.setAttribute("http.method", request.getMethod());
         span.setAttribute("http.route", request.getRequestURI());
+        span.setAttribute("http.url", request.getRequestURL().toString());
+        span.setAttribute("http.user_agent", request.getHeader("User-Agent"));
+        span.setAttribute("http.scheme", request.getScheme());
+        span.setAttribute("http.host", request.getServerName());
+        span.setAttribute("http.target", request.getRequestURI());
+        
+        // GroundCover-specific attributes
+        span.setAttribute("service.namespace", "shash.demo");
+        span.setAttribute("deployment.environment", "groundcover-demo");
+        span.setAttribute("service.version", "1.0.0");
+        span.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
+        
         return true;
     }
 

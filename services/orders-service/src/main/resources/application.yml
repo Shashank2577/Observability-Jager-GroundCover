@@ -20,7 +20,7 @@ spring:
     connect-retries: 10
 observability:
   enabled: true
-  service-name: orders-service
+  service-name: shash.demo-orders-service
   sampling-probability: 1.0
   exporter: otlp
   otlp-endpoint: ${OTLP_ENDPOINT:http://otel-collector:4317}

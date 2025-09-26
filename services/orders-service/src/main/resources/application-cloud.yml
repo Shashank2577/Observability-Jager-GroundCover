@@ -8,6 +8,7 @@ spring:
     password: orders
 
 observability:
+  service-name: shash.demo-orders-service
   otlp-endpoint: http://otel-collector:4317
 
 inventory:

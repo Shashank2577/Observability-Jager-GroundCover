@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: orders-service
-          image: shashtaazaa/orders-service:1.0.0
+          image: shashtaazaa/orders-service:1.3.0-groundcover
           imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_DATASOURCE_URL
@@ -42,7 +42,7 @@ spec:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://otel-collector:4317
             - name: OTEL_RESOURCE_ATTRIBUTES
-              value: service.name=orders-service,service.namespace=observability-demo,deployment.environment=dev
+              value: service.name=shash.demo-orders-service,service.namespace=shash.demo,deployment.environment=groundcover-demo
             - name: INVENTORY_BASE_URL
               value: http://inventory-service:8080
           ports:
