@@ -1,0 +1,78 @@
+{{- if .Values.inventoryService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: inventory-service
+spec:
+  type: {{ default "ClusterIP" .Values.inventoryService.service.type }}
+  selector:
+    app: inventory-service
+  ports:
+    - name: http
+      port: {{ .Values.inventoryService.service.port }}
+      targetPort: {{ .Values.inventoryService.service.port }}
+      {{- if and (eq (default "ClusterIP" .Values.inventoryService.service.type) "NodePort") .Values.inventoryService.service.nodePort }}
+      nodePort: {{ .Values.inventoryService.service.nodePort }}
+      {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: inventory-service
+spec:
+  replicas: {{ .Values.inventoryService.replicaCount }}
+  selector:
+    matchLabels:
+      app: inventory-service
+  template:
+    metadata:
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+        - name: inventory-service
+          {{- if .Values.global.image.registry }}
+          image: {{ printf "%s/%s:%s" .Values.global.image.registry .Values.inventoryService.image.name .Values.global.image.tag }}
+          {{- else }}
+          image: {{ printf "%s:%s" .Values.inventoryService.image.name .Values.global.image.tag }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://inventory-postgres:5432/inventory
+            - name: SPRING_DATASOURCE_USERNAME
+              value: inventory
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: inventory
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ include "gc.otlpEndpoint" . }}
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.name=inventory-service,service.namespace={{ .Values.global.namespace }},{{ .Values.global.otlp.resourceAttributes }}"
+            {{- $java := include "gc.javaAgentOpts" . }}
+            {{- if $java }}
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ $java | quote }}
+            {{- end }}
+          ports:
+            - containerPort: {{ .Values.inventoryService.service.port }}
+          readinessProbe:
+            httpGet:
+              path: /inventory/health
+              port: {{ .Values.inventoryService.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /inventory/health
+              port: {{ .Values.inventoryService.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+{{- toYaml .Values.inventoryService.resources | nindent 12 }}
+{{- end }}

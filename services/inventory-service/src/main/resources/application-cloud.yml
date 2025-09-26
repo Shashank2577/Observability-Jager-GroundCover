@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://inventory-postgres:5432/inventory
+    username: inventory
+    password: inventory
+
+observability:
+  otlp-endpoint: http://otel-collector:4317

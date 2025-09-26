@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: personal-workspace
+  labels:
+    app: otel-collector
+    component: otel
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch: {}
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+      resourcedetection:
+        detectors: [ env, system, k8s ]
+        timeout: 2s
+        override: false
+    exporters:
+      logging:
+        verbosity: normal
+      otlp:
+        # Forward to groundcover collector/agent if exposed internally; adjust endpoint accordingly.
+        endpoint: groundcover-opentelemetry-collector:4317
+        tls:
+          insecure: true
+      jaeger:
+        endpoint: jaeger:14250
+        tls:
+          insecure: true
+    service:
+      telemetry:
+        logs:
+          level: "info"
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp, jaeger, logging]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [logging]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: personal-workspace
+  labels:
+    app: otel-collector
+spec:
+  type: ClusterIP
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: personal-workspace
+  labels:
+    app: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.95.0
+          args: ["--config=/conf/otel-collector-config.yaml"]
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: config
+              mountPath: /conf
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config
+            items:
+              - key: otel-collector-config.yaml
+                path: otel-collector-config.yaml

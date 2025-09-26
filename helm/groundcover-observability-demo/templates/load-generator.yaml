@@ -1,0 +1,38 @@
+{{- if and .Values.loadGenerator.enabled .Values.ordersService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gc.fullname" . }}-loadgen
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: demo-load-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-load-generator
+  template:
+    metadata:
+      labels:
+        app: demo-load-generator
+    spec:
+      containers:
+        - name: loadgen
+          image: {{ .Values.loadGenerator.image }}
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              echo "Starting traffic against orders-service";
+              SKUS="ALPHA BETA GAMMA DELTA OMEGA";
+              while true; do
+                for i in $(seq 1 20); do
+                  SKU=$(echo $SKUS | awk '{print $((RANDOM%NF)+1)}');
+                  QTY=$(( (RANDOM % 5) + 1 ));
+                  curl -sf -X POST "http://orders-service:{{ .Values.ordersService.service.port }}/orders?sku=${SKU}&qty=${QTY}" >/dev/null || echo "fail";
+                  sleep {{ .Values.loadGenerator.rate.sleepSeconds }};
+                done;
+              done
+          resources:
+{{- toYaml .Values.loadGenerator.resources | nindent 12 }}
+{{- end }}
+

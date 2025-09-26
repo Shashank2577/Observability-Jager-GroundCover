@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS orders (
+    id VARCHAR(64) PRIMARY KEY,
+    sku VARCHAR(64) NOT NULL,
+    quantity INTEGER NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+

@@ -1,0 +1,25 @@
+Thank you for installing the groundcover-observability-demo chart.
+
+Release Name: {{ .Release.Name }}
+Namespace: {{ .Values.global.namespace }}
+
+To view deployed resources:
+  kubectl get all -n {{ .Values.global.namespace }}
+
+If load generator enabled, traffic will start automatically.
+
+Tracing Endpoint Mode: {{ .Values.global.otlp.mode }}
+OTLP Endpoint Used: {{ include "gc.otlpEndpoint" . }}
+
+To port-forward orders service locally:
+  kubectl -n {{ .Values.global.namespace }} port-forward svc/orders-service 8080:8080 &
+  curl -X POST "http://localhost:8080/orders?sku=ALPHA&qty=1"
+
+Upgrade example (enable Java agent):
+  helm upgrade {{ .Release.Name }} ./helm/groundcover-observability-demo \
+    --set global.javaAgent.enabled=true
+
+Uninstall:
+  helm uninstall {{ .Release.Name }}
+  (Namespace not removed automatically — delete manually if desired.)
+

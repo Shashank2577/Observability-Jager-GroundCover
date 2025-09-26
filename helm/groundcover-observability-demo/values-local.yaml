@@ -1,0 +1,40 @@
+# Local Docker Desktop overrides (no external registry, NodePort exposure)
+
+global:
+  namespace: observability-demo
+  createNamespace: false
+  image:
+    registry: ""        # Use locally built images (docker build) without pushing
+    tag: "1.0.0-SNAPSHOT"
+    pullPolicy: IfNotPresent
+  otlp:
+    mode: collector      # Use in-cluster collector (logging only if forwardEndpoint blank)
+    endpoint: ""
+    resourceAttributes: "deployment.environment=local"
+  javaAgent:
+    enabled: false
+
+collector:
+  enabled: true
+  forwardEndpoint: ""    # Leave blank so collector only logs spans (no external forward)
+
+ordersService:
+  service:
+    type: NodePort
+    nodePort: 30080
+  replicaCount: 1
+  postgres:
+    enabled: true
+
+inventoryService:
+  service:
+    type: NodePort
+    nodePort: 30081
+  replicaCount: 1
+  postgres:
+    enabled: true
+
+loadGenerator:
+  enabled: true
+  rate:
+    sleepSeconds: 0.25

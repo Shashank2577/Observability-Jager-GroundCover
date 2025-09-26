@@ -1,0 +1,65 @@
+{{- if and .Values.ordersService.enabled .Values.ordersService.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-postgres
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: orders-postgres
+spec:
+  selector:
+    app: orders-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-postgres
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: orders-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-postgres
+  template:
+    metadata:
+      labels:
+        app: orders-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.ordersService.postgres.image }}
+          env:
+            - name: POSTGRES_USER
+              value: orders
+            - name: POSTGRES_PASSWORD
+              value: orders
+            - name: POSTGRES_DB
+              value: orders
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+{{- toYaml .Values.ordersService.postgres.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          emptyDir: {}
+{{- end }}
+

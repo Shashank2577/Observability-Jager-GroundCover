@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: personal-workspace
+  labels:
+    app: groundcover-observability-demo
+

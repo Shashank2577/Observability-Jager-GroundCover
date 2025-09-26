@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/orders
+    username: orders
+    password: orders
+
+observability:
+  otlp-endpoint: http://localhost:4317
+
+inventory:
+  base-url: http://localhost:8080

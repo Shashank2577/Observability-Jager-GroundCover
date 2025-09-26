@@ -1,0 +1,101 @@
+{{- if and .Values.collector.enabled (ne .Values.global.otlp.mode "direct") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: otel-collector
+    component: otel
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch: {}
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+    exporters:
+      logging:
+        verbosity: normal
+      {{- if .Values.collector.forwardEndpoint }}
+      otlp:
+        endpoint: {{ .Values.collector.forwardEndpoint }}
+        tls:
+          insecure: true
+      {{- end }}
+    service:
+      telemetry:
+        logs:
+          level: "info"
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [logging{{ if .Values.collector.forwardEndpoint }}, otlp{{ end }}]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [logging]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: otel-collector
+spec:
+  type: ClusterIP
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: {{ .Values.collector.image }}
+          args: ["--config=/conf/otel-collector-config.yaml"]
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: config
+              mountPath: /conf
+          resources:
+{{- toYaml .Values.collector.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config
+            items:
+              - key: otel-collector-config.yaml
+                path: otel-collector-config.yaml
+{{- end }}

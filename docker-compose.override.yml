@@ -1,0 +1,40 @@
+# Override for local development
+version: '3.8'
+services:
+  inventory-service:
+    build:
+      context: .
+      dockerfile: services/inventory-service/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=cloud
+      - DATABASE_URL=jdbc:postgresql://inventory-postgres:5432/inventory
+      - DATABASE_USERNAME=inventory
+      - DATABASE_PASSWORD=inventory
+      - OTLP_ENDPOINT=http://otel-collector:4317
+      - OBSERVABILITY_SERVICE_NAME=inventory-service
+    depends_on:
+      - inventory-postgres
+      - otel-collector
+    restart: unless-stopped
+
+  orders-service:
+    build:
+      context: .
+      dockerfile: services/orders-service/Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=cloud
+      - DATABASE_URL=jdbc:postgresql://orders-postgres:5432/orders
+      - DATABASE_USERNAME=orders
+      - DATABASE_PASSWORD=orders
+      - OTLP_ENDPOINT=http://otel-collector:4317
+      - OBSERVABILITY_SERVICE_NAME=orders-service
+      - INVENTORY_BASE_URL=http://inventory-service:8080
+    depends_on:
+      - orders-postgres
+      - inventory-service
+      - otel-collector
+    restart: unless-stopped

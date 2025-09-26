@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-load-generator
+  namespace: personal-workspace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-load-generator
+  template:
+    metadata:
+      labels:
+        app: demo-load-generator
+    spec:
+      containers:
+        - name: loadgen
+          image: curlimages/curl:8.8.0
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              echo "Starting traffic against orders-service";
+              SKUS="ALPHA BETA GAMMA DELTA OMEGA";
+              while true; do 
+                for i in $(seq 1 20); do 
+                  SKU=$(echo $SKUS | awk '{print $((RANDOM%NF)+1)}'); 
+                  QTY=$(( (RANDOM % 5) + 1 )); 
+                  curl -sf -X POST "http://orders-service:8080/orders?sku=${SKU}&qty=${QTY}" >/dev/null || echo "fail"; 
+                  sleep 0.2; 
+                done; 
+              done
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+

@@ -1,0 +1,18 @@
+# Common VCS
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Mac / OS
+.DS_Store
+
+# Build artifacts
+*.tgz
+
+# Docs not needed inside chart package
+README.md
+

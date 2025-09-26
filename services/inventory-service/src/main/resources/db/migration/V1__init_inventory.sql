@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS inventory_items (
+    id VARCHAR(64) PRIMARY KEY,
+    sku VARCHAR(64) NOT NULL UNIQUE,
+    available INTEGER NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+

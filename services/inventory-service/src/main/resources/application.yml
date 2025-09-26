@@ -1,0 +1,34 @@
+server:
+  port: ${SERVER_PORT:8080}
+spring:
+  application:
+    name: inventory-service
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://inventory-postgres:5432/inventory}
+    username: ${DATABASE_USERNAME:inventory}
+    password: ${DATABASE_PASSWORD:inventory}
+    hikari:
+      initialization-fail-timeout: -1
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    connect-retries: 10
+observability:
+  enabled: true
+  service-name: inventory-service
+  sampling-probability: 1.0
+  exporter: otlp
+  otlp-endpoint: ${OTLP_ENDPOINT:http://otel-collector:4317}
+logging:
+  pattern:
+    console: "%d %-5level [%thread] %logger - %msg traceId=%X{traceId} spanId=%X{spanId}%n"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
