@@ -14,23 +14,6 @@ data:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
-      # File log receiver for application logs
-      filelog:
-        include: [ "/var/log/app/*.log" ]
-        start_at: beginning
-        operators:
-          - type: json_parser
-            parse_from: body
-          - type: move
-            from: attributes.trace_id
-            to: trace_id
-          - type: move
-            from: attributes.span_id
-            to: span_id
-      # Syslog receiver for container logs
-      syslog:
-        listen_address: "0.0.0.0:514"
-        protocol: tcp
 
     exporters:
       logging:
@@ -57,6 +40,11 @@ data:
       batch:
         timeout: 1s
         send_batch_size: 1024
+      attributes:
+        actions:
+          - action: upsert
+            key: service.name
+            from_attribute: service.name
       resource:
         attributes:
           - key: deployment.environment
@@ -79,8 +67,8 @@ data:
           processors: [resource, batch]
           exporters: [logging, otlp/groundcover-grpc, otlp/groundcover-http]
         logs:
-          receivers: [otlp, filelog, syslog]
-          processors: [resource, batch]
+          receivers: [otlp]
+          processors: [attributes, resource, batch]
           exporters: [logging, otlp/groundcover-logs-grpc, otlp/groundcover-logs-http]
 ---
 apiVersion: v1

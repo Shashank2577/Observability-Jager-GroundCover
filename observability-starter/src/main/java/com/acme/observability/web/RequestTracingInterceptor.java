@@ -3,6 +3,7 @@ package com.acme.observability.web;
 import com.acme.observability.logging.MdcLogContextEnricher;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
@@ -66,6 +67,11 @@ public class RequestTracingInterceptor implements HandlerInterceptor {
         span.setAttribute("deployment.environment", "groundcover-demo");
         span.setAttribute("service.version", "1.0.0");
         span.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
+        
+        // Add trace correlation attributes for GroundCover
+        SpanContext spanContext = span.getSpanContext();
+        span.setAttribute("trace.trace_id", spanContext.getTraceId());
+        span.setAttribute("trace.span_id", spanContext.getSpanId());
         
         return true;
     }

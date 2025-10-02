@@ -2,10 +2,13 @@ package com.acme.observability.autoconfig;
 
 import com.acme.observability.config.ObservabilityProperties;
 import com.acme.observability.exporter.SimpleLoggingSpanExporter;
+import com.acme.observability.logging.OtlpLogbackAppender;
+import com.acme.observability.logging.OtlpLoggingConfiguration;
 import com.acme.observability.web.BaggageFilter;
 import com.acme.observability.web.RequestTracingInterceptor;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.logs.LoggerProvider;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.Context;
@@ -46,6 +49,10 @@ public class ObservabilityAutoConfiguration {
     public OpenTelemetry openTelemetry(ObservabilityProperties props) {
         Resource resource = Resource.getDefault().merge(Resource.create(Attributes.builder()
                 .put("service.name", props.getServiceName())
+                .put("service.namespace", "shash.demo")
+                .put("deployment.environment", "groundcover-demo")
+                .put("service.version", "1.0.0")
+                .put("service.instance.id", System.getProperty("user.name", "unknown"))
                 .build()));
         SdkTracerProviderBuilder tpBuilder = SdkTracerProvider.builder()
                 .setResource(resource)
@@ -90,6 +97,17 @@ public class ObservabilityAutoConfiguration {
     }
 
     @Bean
+    public OtlpLogbackAppender otlpLogbackAppender(ObjectProvider<LoggerProvider> loggerProviderProvider, ObservabilityProperties props) {
+        OtlpLogbackAppender appender = new OtlpLogbackAppender();
+        LoggerProvider loggerProvider = loggerProviderProvider.getIfAvailable();
+        if (loggerProvider != null) {
+            appender.setLoggerProvider(loggerProvider);
+        }
+        appender.setServiceName(props.getServiceName());
+        return appender;
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     public RestTemplate restTemplate(ObjectProvider<OpenTelemetry> otelProvider) {
         RestTemplate rt = new RestTemplate();
@@ -121,6 +139,11 @@ public class ObservabilityAutoConfiguration {
                     clientSpan.setAttribute("deployment.environment", "groundcover-demo");
                     clientSpan.setAttribute("service.version", "1.0.0");
                     clientSpan.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
+                    
+                    // Add trace correlation attributes for GroundCover
+                    io.opentelemetry.api.trace.SpanContext spanContext = clientSpan.getSpanContext();
+                    clientSpan.setAttribute("trace.trace_id", spanContext.getTraceId());
+                    clientSpan.setAttribute("trace.span_id", spanContext.getSpanId());
                     
                     return execution.execute(request, body);
                 } catch (Exception e) {

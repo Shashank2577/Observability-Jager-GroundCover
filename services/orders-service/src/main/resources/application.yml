@@ -24,9 +24,11 @@ observability:
   sampling-probability: 1.0
   exporter: otlp
   otlp-endpoint: ${OTLP_ENDPOINT:http://otel-collector:4317}
+  # OTLP logging configuration
+  otlp-logs-endpoint: ${OTLP_LOGS_ENDPOINT:http://otel-collector:4317}
 logging:
   pattern:
-    console: "%d %-5level [%thread] %logger - %msg traceId=%X{traceId} spanId=%X{spanId}%n"
+    console: "%d %-5level [%thread] %logger - %msg trace_id=%X{trace_id} span_id=%X{span_id}%n"
 management:
   endpoints:
     web:

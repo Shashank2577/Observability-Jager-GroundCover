@@ -11,6 +11,10 @@ public final class MdcLogContextEnricher {
         if (span == null) return;
         SpanContext ctx = span.getSpanContext();
         if (ctx != null && ctx.isValid()) {
+            // Use trace_id field name that GroundCover recognizes
+            MDC.put("trace_id", ctx.getTraceId());
+            MDC.put("span_id", ctx.getSpanId());
+            // Keep legacy fields for backward compatibility
             MDC.put("traceId", ctx.getTraceId());
             MDC.put("spanId", ctx.getSpanId());
         }
@@ -21,6 +25,8 @@ public final class MdcLogContextEnricher {
     }
 
     public static void clear() {
+        MDC.remove("trace_id");
+        MDC.remove("span_id");
         MDC.remove("traceId");
         MDC.remove("spanId");
     }

@@ -11,6 +11,8 @@ public class ObservabilityProperties {
     /** exporter: otlp | logging */
     private String exporter = "otlp";
     private String otlpEndpoint = "http://otel-collector:4317";
+    /** OTLP logs endpoint */
+    private String otlpLogsEndpoint = "http://otel-collector:4317";
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -22,5 +24,7 @@ public class ObservabilityProperties {
     public void setExporter(String exporter) { this.exporter = exporter; }
     public String getOtlpEndpoint() { return otlpEndpoint; }
     public void setOtlpEndpoint(String otlpEndpoint) { this.otlpEndpoint = otlpEndpoint; }
+    public String getOtlpLogsEndpoint() { return otlpLogsEndpoint; }
+    public void setOtlpLogsEndpoint(String otlpLogsEndpoint) { this.otlpLogsEndpoint = otlpLogsEndpoint; }
 }
 

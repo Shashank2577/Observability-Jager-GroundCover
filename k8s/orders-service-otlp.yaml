@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-service
+  namespace: observability-demo
+  labels:
+    app: orders-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orders-service
+  template:
+    metadata:
+      labels:
+        app: orders-service
+    spec:
+      containers:
+        - name: orders-service
+          image: shashtaazaa/orders-service:1.4.0-groundcover
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://orders-postgres:5432/orders"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "orders"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "orders"
+            - name: OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OTLP_LOGS_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OBSERVABILITY_SERVICE_NAME
+              value: "shash.demo-orders-service"
+            - name: INVENTORY_BASE_URL
+              value: "http://inventory-service:8080"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-service
+  namespace: observability-demo
+  labels:
+    app: orders-service
+spec:
+  type: ClusterIP
+  selector:
+    app: orders-service
+  ports:
+    - port: 8080
+      targetPort: 8080

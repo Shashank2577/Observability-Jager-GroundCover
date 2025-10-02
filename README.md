@@ -333,7 +333,6 @@ kubectl logs -l app=inventory-service
 - [Configuration Guide](CONFIGURATION_GUIDE.md) - Environment-specific configuration
 - [Deployment Guide](DEPLOYMENT_GUIDE.md) - Complete deployment instructions
 - [Rancher Connection Guide](RANCHER_CONNECTION_GUIDE.md) - Rancher cloud deployment
-- [GroundCover Integration](GROUNDCOVER_TRACE_CORRELATION_FIX.md) - GroundCover-specific setup
 
 ## 🤝 Contributing
 

@@ -2,6 +2,7 @@ package com.acme.observability.logging;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import org.slf4j.Logger;
@@ -53,6 +54,11 @@ public final class ObservabilityHelper {
             currentSpan.setAttribute("deployment.environment", "groundcover-demo");
             currentSpan.setAttribute("service.version", "1.0.0");
             currentSpan.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
+            
+            // Add trace correlation attributes for GroundCover
+            SpanContext spanContext = currentSpan.getSpanContext();
+            currentSpan.setAttribute("trace.trace_id", spanContext.getTraceId());
+            currentSpan.setAttribute("trace.span_id", spanContext.getSpanId());
             
             // Add custom attributes
             attributes.forEach((k,v) -> currentSpan.setAttribute(k, String.valueOf(v)));

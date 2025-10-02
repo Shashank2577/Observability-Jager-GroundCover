@@ -13,6 +13,7 @@ services:
       - DATABASE_USERNAME=inventory
       - DATABASE_PASSWORD=inventory
       - OTLP_ENDPOINT=http://otel-collector:4317
+      - OTLP_LOGS_ENDPOINT=http://otel-collector:4317
       - OBSERVABILITY_SERVICE_NAME=inventory-service
     depends_on:
       - inventory-postgres
@@ -31,6 +32,7 @@ services:
       - DATABASE_USERNAME=orders
       - DATABASE_PASSWORD=orders
       - OTLP_ENDPOINT=http://otel-collector:4317
+      - OTLP_LOGS_ENDPOINT=http://otel-collector:4317
       - OBSERVABILITY_SERVICE_NAME=orders-service
       - INVENTORY_BASE_URL=http://inventory-service:8080
     depends_on:

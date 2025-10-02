@@ -8,7 +8,7 @@ concurrency="${CONCURRENCY:-5}"
 iterations="${ITERATIONS:-100}"
 sleep_ms="${SLEEP_MS:-200}"
 
-log() { echo "[$(date -Is)] $*"; }
+log() { echo "[$(date -Iseconds)] $*"; }
 
 run_once() {
   local sku=${SKUS[$RANDOM % ${#SKUS[@]}]}

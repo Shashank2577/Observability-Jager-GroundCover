@@ -17,7 +17,7 @@ ordersService:
   enabled: true
   image:
     repository: shashtaazaa/orders-service
-    tag: "1.0.0"
+    tag: "1.4.0-groundcover"
     pullPolicy: IfNotPresent
   replicaCount: 2
   service:
@@ -34,8 +34,9 @@ ordersService:
     SPRING_DATASOURCE_URL: "jdbc:postgresql://orders-postgres:5432/orders"
     SPRING_DATASOURCE_USERNAME: "orders"
     SPRING_DATASOURCE_PASSWORD: "orders"
-    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-    OTEL_RESOURCE_ATTRIBUTES: "service.name=orders-service,service.namespace=observability-demo,deployment.environment=dev"
+    OTLP_ENDPOINT: "http://otel-collector:4317"
+    OTLP_LOGS_ENDPOINT: "http://otel-collector:4317"
+    OBSERVABILITY_SERVICE_NAME: "shash.demo-orders-service"
     INVENTORY_BASE_URL: "http://inventory-service:8080"
 
 # Inventory service configuration
@@ -43,7 +44,7 @@ inventoryService:
   enabled: true
   image:
     repository: shashtaazaa/inventory-service
-    tag: "1.0.0"
+    tag: "1.4.0-groundcover"
     pullPolicy: IfNotPresent
   replicaCount: 2
   service:
@@ -60,8 +61,9 @@ inventoryService:
     SPRING_DATASOURCE_URL: "jdbc:postgresql://inventory-postgres:5432/inventory"
     SPRING_DATASOURCE_USERNAME: "inventory"
     SPRING_DATASOURCE_PASSWORD: "inventory"
-    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-    OTEL_RESOURCE_ATTRIBUTES: "service.name=inventory-service,service.namespace=observability-demo,deployment.environment=dev"
+    OTLP_ENDPOINT: "http://otel-collector:4317"
+    OTLP_LOGS_ENDPOINT: "http://otel-collector:4317"
+    OBSERVABILITY_SERVICE_NAME: "shash.demo-inventory-service"
 
 # PostgreSQL configuration
 postgres:

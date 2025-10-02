@@ -1,12 +1,39 @@
 <configuration>
+    <!-- Inject Spring-managed LoggerProvider -->
+    <springProperty scope="context" name="loggerProvider" source="sdkLoggerProvider"/>
+    <springProperty scope="context" name="serviceNameProp" source="observabilityProperties.serviceName"/>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d %-5level [%thread] %logger - %msg traceId=%X{traceId} spanId=%X{spanId}%n</pattern>
+    
+    <!-- OTLP logging appender for GroundCover -->
+    <appender name="OTLP" class="com.acme.observability.logging.OtlpLogbackAppender">
+        <loggerProvider>${loggerProvider}</loggerProvider>
+        <serviceName>${serviceNameProp}</serviceName>
+    </appender>
+    
+    <!-- JSON structured logging for GroundCover correlation -->
+    <appender name="JSON_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <logLevel/>
+                <loggerName/>
+                <message/>
+                <mdc/>
+                <stackTrace/>
+            </providers>
         </encoder>
     </appender>
+    
+    <!-- Fallback pattern logging -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %-5level [%thread] %logger - %msg trace_id=%X{trace_id} span_id=%X{span_id}%n</pattern>
+        </encoder>
+    </appender>
+    
     <root level="INFO">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="OTLP"/>
+        <appender-ref ref="JSON_STDOUT"/>
     </root>
 </configuration>
 
