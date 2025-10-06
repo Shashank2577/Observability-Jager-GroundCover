@@ -47,24 +47,27 @@ public class ObservabilityAutoConfiguration {
         Resource resource = Resource.getDefault().merge(Resource.create(Attributes.builder()
                 .put("service.name", props.getServiceName())
                 .build()));
+        
+        // Configure Tracer Provider
         SdkTracerProviderBuilder tpBuilder = SdkTracerProvider.builder()
                 .setResource(resource)
                 .setSampler(Sampler.traceIdRatioBased(props.getSamplingProbability()));
 
         if ("otlp".equalsIgnoreCase(props.getExporter())) {
-            log.info("Configuring OTLP exporter at {}", props.getOtlpEndpoint());
-            OtlpGrpcSpanExporter exporter = OtlpGrpcSpanExporter.builder()
+            log.info("Configuring OTLP trace exporter at {}", props.getOtlpEndpoint());
+            OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.builder()
                     .setEndpoint(props.getOtlpEndpoint())
                     .build();
-            tpBuilder.addSpanProcessor(BatchSpanProcessor.builder(exporter).build());
+            tpBuilder.addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build());
         } else {
             log.info("Configuring simple logging span exporter (fallback mode)");
             tpBuilder.addSpanProcessor(BatchSpanProcessor.builder(new SimpleLoggingSpanExporter()).build());
         }
 
-        SdkTracerProvider provider = tpBuilder.build();
+        SdkTracerProvider tracerProvider = tpBuilder.build();
+        
         OpenTelemetrySdk sdk = OpenTelemetrySdk.builder()
-                .setTracerProvider(provider)
+                .setTracerProvider(tracerProvider)
                 .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .buildAndRegisterGlobal();
         return sdk;

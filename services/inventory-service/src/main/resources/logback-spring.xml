@@ -1,12 +1,28 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    
+    <!-- Console appender for local debugging -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d %-5level [%thread] %logger - %msg traceId=%X{traceId} spanId=%X{spanId}%n</pattern>
         </encoder>
     </appender>
+    
+    <!-- File appender for local debugging -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/workspace/logs/inventory-otlp.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/workspace/logs/inventory-otlp.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>
 
