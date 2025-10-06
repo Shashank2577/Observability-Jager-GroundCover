@@ -23,7 +23,7 @@ observability:
   service-name: orders-service
   sampling-probability: 1.0
   exporter: otlp
-  otlp-endpoint: ${OTLP_ENDPOINT:http://otel-collector:4317}
+  otlp-endpoint: ${OTLP_ENDPOINT:https://api.groundcover.com/v1/otlp}
 logging:
   pattern:
     console: "%d %-5level [%thread] %logger - %msg traceId=%X{traceId} spanId=%X{spanId}%n"
