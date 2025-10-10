@@ -52,7 +52,7 @@ public final class ObservabilityHelper {
             // Add GroundCover-specific attributes
             currentSpan.setAttribute("service.namespace", "shash.demo");
             currentSpan.setAttribute("deployment.environment", "groundcover-demo");
-            currentSpan.setAttribute("service.version", "1.0.0");
+            currentSpan.setAttribute("service.version", "1.4.0-groundcover");
             currentSpan.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
             
             // Add trace correlation attributes for GroundCover

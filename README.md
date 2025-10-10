@@ -354,6 +354,45 @@ For issues and questions:
 3. Verify your environment configuration
 4. Check the documentation links above
 
+## 🔧 **Recent Fixes (v1.5.0)**
+
+### ✅ **Critical Issues Resolved**
+
+1. **Fixed Orders Service Logs**: Updated logback configuration to properly inject `LoggerProvider` and generate trace correlation fields
+2. **Fixed Namespace Mismatch**: Removed `attributes` processor from logs pipeline that was causing namespace inconsistencies between traces and logs
+3. **Synchronized Services**: Both services now running version `1.5.0-groundcover` for consistency
+4. **Optimized Collector**: Simplified configuration with single GroundCover endpoint and reduced batch size
+
+### 🚨 **Critical Issue Resolved**
+
+**Root Cause**: The logs pipeline had an extra `attributes` processor that was overriding service names, causing namespace mismatches between traces and logs.
+
+**Fix**: Removed the `attributes` processor from the logs pipeline to ensure both traces and logs use the same namespace (`shash.demo`).
+
+**Before (Broken)**:
+```yaml
+logs:
+  receivers: [otlp]
+  processors: [attributes, resource, batch]  # ← Extra attributes processor
+  exporters: [logging, otlp/groundcover]
+```
+
+**After (Fixed)**:
+```yaml
+logs:
+  receivers: [otlp]
+  processors: [resource, batch]  # ← Removed attributes processor
+  exporters: [logging, otlp/groundcover]
+```
+
+### 📊 **Current Status**
+
+- ✅ **Services**: Both running version `1.5.0-groundcover`
+- ✅ **Collector**: Stable with fixed configuration
+- ✅ **Traces**: Full correlation across services
+- ✅ **Logs**: Proper trace correlation with consistent namespace
+- ✅ **GroundCover**: Ready for ingestion
+
 ---
 
 **Happy Observing! 🔍✨**

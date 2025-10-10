@@ -24,9 +24,9 @@ public class OtlpLoggingConfiguration {
     public SdkLoggerProvider sdkLoggerProvider(ObservabilityProperties props) {
         Resource resource = Resource.getDefault().merge(Resource.create(Attributes.builder()
                 .put("service.name", props.getServiceName())
-                .put("service.namespace", "shash.demo")
+                .put("service.namespace", props.getServiceNamespace())
                 .put("deployment.environment", "groundcover-demo")
-                .put("service.version", "1.0.0")
+                .put("service.version", "1.4.0-groundcover")
                 .put("service.instance.id", System.getProperty("user.name", "unknown"))
                 .build()));
 

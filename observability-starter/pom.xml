@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.acme.observability</groupId>
         <artifactId>groundcover-observability-demo</artifactId>
-        <version>1.4.0-groundcover-SNAPSHOT</version>
+        <version>1.11.0-groundcover-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>observability-starter</artifactId>
@@ -38,6 +38,12 @@
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
             <version>${otel.version}</version>
+        </dependency>
+        <!-- OpenTelemetry logs dependency not available in 1.37.0, using SDK instead -->
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+            <version>2.5.0-alpha</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

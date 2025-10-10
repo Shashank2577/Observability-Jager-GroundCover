@@ -2,7 +2,7 @@ package com.acme.observability.autoconfig;
 
 import com.acme.observability.config.ObservabilityProperties;
 import com.acme.observability.exporter.SimpleLoggingSpanExporter;
-import com.acme.observability.logging.OtlpLogbackAppender;
+// import com.acme.observability.logging.OtlpLogbackAppender; // Disabled - using official appender
 import com.acme.observability.logging.OtlpLoggingConfiguration;
 import com.acme.observability.web.BaggageFilter;
 import com.acme.observability.web.RequestTracingInterceptor;
@@ -15,6 +15,9 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -49,9 +52,9 @@ public class ObservabilityAutoConfiguration {
     public OpenTelemetry openTelemetry(ObservabilityProperties props) {
         Resource resource = Resource.getDefault().merge(Resource.create(Attributes.builder()
                 .put("service.name", props.getServiceName())
-                .put("service.namespace", "shash.demo")
+                .put("service.namespace", props.getServiceNamespace())
                 .put("deployment.environment", "groundcover-demo")
-                .put("service.version", "1.0.0")
+                .put("service.version", "1.11.0-groundcover")
                 .put("service.instance.id", System.getProperty("user.name", "unknown"))
                 .build()));
         SdkTracerProviderBuilder tpBuilder = SdkTracerProvider.builder()
@@ -97,14 +100,31 @@ public class ObservabilityAutoConfiguration {
     }
 
     @Bean
-    public OtlpLogbackAppender otlpLogbackAppender(ObjectProvider<LoggerProvider> loggerProviderProvider, ObservabilityProperties props) {
-        OtlpLogbackAppender appender = new OtlpLogbackAppender();
-        LoggerProvider loggerProvider = loggerProviderProvider.getIfAvailable();
-        if (loggerProvider != null) {
-            appender.setLoggerProvider(loggerProvider);
+    @ConditionalOnProperty(name = "observability.enabled", havingValue = "true", matchIfMissing = true)
+    public LoggerProvider loggerProvider(ObservabilityProperties props) {
+        if ("otlp".equalsIgnoreCase(props.getExporter())) {
+            // Create OTLP log exporter using the dedicated logs endpoint
+            String logsEndpoint = props.getOtlpLogsEndpoint() != null ? props.getOtlpLogsEndpoint() : props.getOtlpEndpoint();
+            OtlpGrpcLogRecordExporter logExporter = OtlpGrpcLogRecordExporter.builder()
+                    .setEndpoint(logsEndpoint)
+                    .build();
+            
+            // Create resource with service information
+            Resource resource = Resource.getDefault()
+                    .merge(Resource.builder()
+                            .put("service.name", props.getServiceName())
+                            .put("service.namespace", props.getServiceNamespace())
+                            .put("deployment.environment", "groundcover-demo")
+                            .put("service.version", "1.11.0-groundcover")
+                            .build());
+            
+            // Create logger provider with OTLP exporter
+            return SdkLoggerProvider.builder()
+                    .setResource(resource)
+                    .addLogRecordProcessor(BatchLogRecordProcessor.builder(logExporter).build())
+                    .build();
         }
-        appender.setServiceName(props.getServiceName());
-        return appender;
+        return null;
     }
 
     @Bean
@@ -137,7 +157,7 @@ public class ObservabilityAutoConfiguration {
                     // GroundCover-specific attributes
                     clientSpan.setAttribute("service.namespace", "shash.demo");
                     clientSpan.setAttribute("deployment.environment", "groundcover-demo");
-                    clientSpan.setAttribute("service.version", "1.0.0");
+                    clientSpan.setAttribute("service.version", "1.11.0-groundcover");
                     clientSpan.setAttribute("service.instance.id", System.getProperty("user.name", "unknown"));
                     
                     // Add trace correlation attributes for GroundCover

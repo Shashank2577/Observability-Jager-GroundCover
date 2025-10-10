@@ -30,8 +30,8 @@ spec:
     spec:
       containers:
         - name: inventory-service
-          image: shashtaazaa/inventory-service:1.4.0-groundcover
-          imagePullPolicy: IfNotPresent
+          image: shashtaazaa/inventory-service:1.11.0-groundcover
+          imagePullPolicy: Always
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://inventory-postgres:5432/inventory
@@ -41,6 +41,14 @@ spec:
               value: inventory
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://otel-collector:4317
+            - name: OTEL_LOGS_EXPORTER
+              value: otlp
+            - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+              value: http://otel-collector:4318
+            - name: OTEL_INSTRUMENTATION_LOGGING_EXPERIMENTAL_ENABLED
+              value: "true"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: service.name=shash.demo-inventory-service,service.namespace=shash.demo,deployment.environment=groundcover-demo
           ports:

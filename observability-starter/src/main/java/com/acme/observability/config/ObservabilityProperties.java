@@ -7,6 +7,7 @@ public class ObservabilityProperties {
     /** Enable/disable custom observability starter */
     private boolean enabled = true;
     private String serviceName = "demo-service";
+    private String serviceNamespace = "shash.demo";
     private double samplingProbability = 1.0d;
     /** exporter: otlp | logging */
     private String exporter = "otlp";
@@ -18,6 +19,8 @@ public class ObservabilityProperties {
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public String getServiceName() { return serviceName; }
     public void setServiceName(String serviceName) { this.serviceName = serviceName; }
+    public String getServiceNamespace() { return serviceNamespace; }
+    public void setServiceNamespace(String serviceNamespace) { this.serviceNamespace = serviceNamespace; }
     public double getSamplingProbability() { return samplingProbability; }
     public void setSamplingProbability(double samplingProbability) { this.samplingProbability = samplingProbability; }
     public String getExporter() { return exporter; }

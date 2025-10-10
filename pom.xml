@@ -4,7 +4,7 @@
 
     <groupId>com.acme.observability</groupId>
     <artifactId>groundcover-observability-demo</artifactId>
-    <version>1.4.0-groundcover-SNAPSHOT</version>
+    <version>1.11.0-groundcover-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Groundcover Observability Demo</name>
 

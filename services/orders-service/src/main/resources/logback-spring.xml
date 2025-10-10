@@ -1,16 +1,10 @@
 <configuration>
-    <!-- Inject Spring-managed LoggerProvider -->
-    <springProperty scope="context" name="loggerProvider" source="sdkLoggerProvider"/>
-    <springProperty scope="context" name="serviceNameProp" source="observabilityProperties.serviceName"/>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    
-    <!-- OTLP logging appender for GroundCover -->
-    <appender name="OTLP" class="com.acme.observability.logging.OtlpLogbackAppender">
-        <loggerProvider>${loggerProvider}</loggerProvider>
-        <serviceName>${serviceNameProp}</serviceName>
+    <!-- Official OpenTelemetry OTLP logging appender -->
+    <appender name="OTLP" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+        <!-- OpenTelemetry SDK will be auto-configured by our observability starter -->
     </appender>
     
-    <!-- JSON structured logging for GroundCover correlation -->
+    <!-- JSON structured logging with service namespace for GroundCover -->
     <appender name="JSON_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
@@ -20,20 +14,22 @@
                 <message/>
                 <mdc/>
                 <stackTrace/>
+                <arguments/>
             </providers>
+            <customFields>{"service.name":"shash.demo-orders-service","service.namespace":"shash.demo","deployment.environment":"groundcover-demo"}</customFields>
         </encoder>
     </appender>
     
     <!-- Fallback pattern logging -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d %-5level [%thread] %logger - %msg trace_id=%X{trace_id} span_id=%X{span_id}%n</pattern>
+            <pattern>%d %-5level [%thread] %logger - %msg trace_id=%X{trace_id} span_id=%X{span_id} service.name=shash.demo-orders-service service.namespace=shash.demo%n</pattern>
         </encoder>
     </appender>
     
     <root level="INFO">
         <appender-ref ref="OTLP"/>
         <appender-ref ref="JSON_STDOUT"/>
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
-
